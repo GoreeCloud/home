@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 import json
 from pathlib import Path
 import tempfile
@@ -21,6 +21,8 @@ from goreecloud_home.automation_runtime import (
 from goreecloud_home.core import HomeCore
 from goreecloud_home.journal import EventJournal
 from goreecloud_home.models import Device, Home
+from goreecloud_home.persisted_calendar import PersistedCalendarConstraint
+from goreecloud_home.schedule_calendar import PersistedScheduleCalendarBinding
 
 
 class AutomationRuntimeTests(unittest.TestCase):
@@ -149,6 +151,39 @@ class AutomationRuntimeTests(unittest.TestCase):
             25,
             self.core.snapshot()["device_state"]["lamp"]["desired"]["light.brightness"],
         )
+
+    def test_default_runtime_enforces_persisted_calendar_binding(self) -> None:
+        self.engine.create_schedule(Schedule("morning", "home", "Morning", 7, 30))
+        self.engine.create_automation(
+            Automation(
+                id="morning-light",
+                home_id="home",
+                name="Morning Light",
+                trigger=AutomationTrigger.schedule("morning"),
+                conditions=(),
+                actions=(AutomationAction.set_desired("lamp", "light.brightness", 25),),
+            )
+        )
+        runtime = HomeAutomationRuntime(self.engine)
+        runtime.schedule_calendar_store.set_binding(
+            PersistedScheduleCalendarBinding(
+                schedule_id="morning",
+                calendar=PersistedCalendarConstraint(
+                    date(2026, 9, 7),
+                    date(2026, 9, 7),
+                ),
+            )
+        )
+
+        outside = datetime(2026, 9, 8, 7, 30, tzinfo=timezone.utc)
+        inside = datetime(2026, 9, 7, 7, 30, tzinfo=timezone.utc)
+        self.assertEqual([], runtime.tick(outside))
+        self.assertEqual(1, len(runtime.tick(inside)))
+        self.assertEqual([], runtime.tick(inside))
+        snapshot = runtime.snapshot()
+        self.assertTrue(snapshot["calendar_binding_enforced"])
+        self.assertEqual(3, snapshot["calendar_binding_storage_schema_version"])
+        self.assertEqual(1, snapshot["calendar_bound_schedules"])
 
     def test_runtime_contract_file_matches_runtime_contract(self) -> None:
         path = Path(__file__).resolve().parents[1] / "contracts" / "automation-runtime.v1.json"
