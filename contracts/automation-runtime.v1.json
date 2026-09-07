@@ -5,7 +5,7 @@
   ],
   "availability_observation_triggers": false,
   "contract": "goreecloud-home-automation-runtime",
-  "contract_version": "1.0",
+  "contract_version": "1.1",
   "delivery": {
     "current_actions_idempotent_assignments": true,
     "durable_cursor": true,
@@ -18,6 +18,10 @@
   "network_write_api_exposed": false,
   "schedule_driver": {
     "background": true,
+    "calendar_binding_enforced": true,
+    "calendar_binding_storage_schema_version": 3,
+    "duplicate_occurrence_authority": "schedule.last_fired_key",
+    "location_data_persisted": false,
     "poll_interval_max_seconds": 60.0,
     "poll_interval_min_seconds": 0.1,
     "timezone": "controller-local"
