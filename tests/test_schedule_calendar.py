@@ -47,6 +47,20 @@ class PersistedScheduleCalendarBindingTests(unittest.TestCase):
         self.assertEqual(self.schedule.occurrence_key(inside), self.binding.occurrence_key(self.schedule, inside))
         self.assertIsNone(self.binding.occurrence_key(self.schedule, outside))
 
+    def test_unfired_occurrence_reuses_schedule_checkpoint(self) -> None:
+        inside = datetime(2026, 9, 6, 8, 30, tzinfo=self.central)
+        key = self.schedule.occurrence_key(inside)
+
+        self.assertEqual(key, self.binding.unfired_occurrence_key(self.schedule, inside))
+        self.schedule.last_fired_key = key
+        self.assertIsNone(self.binding.unfired_occurrence_key(self.schedule, inside))
+
+        next_day = datetime(2026, 9, 7, 8, 30, tzinfo=self.central)
+        self.assertEqual(
+            self.schedule.occurrence_key(next_day),
+            self.binding.unfired_occurrence_key(self.schedule, next_day),
+        )
+
     def test_schedule_identity_mismatch_fails_closed(self) -> None:
         other = Schedule(
             id="other",
