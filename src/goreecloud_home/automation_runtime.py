@@ -7,8 +7,12 @@ from typing import Callable
 from .automation import AutomationRun, AutomationTrigger
 from .automation_engine import HomeAutomationEngine
 from .journal import Event
+from .schedule_calendar_store import (
+    AUTOMATION_SCHEDULE_CALENDAR_STORAGE_VERSION,
+    ScheduleCalendarStore,
+)
 
-AUTOMATION_RUNTIME_CONTRACT_VERSION = "1.0"
+AUTOMATION_RUNTIME_CONTRACT_VERSION = "1.1"
 AUTOMATION_RUNTIME_SCHEMA_VERSION = 2
 DEFAULT_POLL_INTERVAL_SECONDS = 1.0
 MAX_EVENT_DRAIN = 1000
@@ -22,6 +26,11 @@ class HomeAutomationRuntime:
     The runtime is intentionally local-only. It consumes committed Home journal events in
     sequence order, routes supported device events into the bounded automation evaluator,
     and drives schedules from a timezone-aware controller-local clock.
+
+    Persistent calendar bindings are enforced by the location-free
+    ``ScheduleCalendarStore``. Bound schedules therefore cannot bypass their persisted
+    calendar window through the default background runtime. The existing durable
+    ``Schedule.last_fired_key`` remains the sole duplicate-occurrence checkpoint.
 
     Delivery is ordered and at-least-once. The durable cursor advances only after each
     source event has been handled. A process failure after a bounded automation action
@@ -50,6 +59,7 @@ class HomeAutomationRuntime:
         self._thread: Thread | None = None
         self._last_error: str | None = None
         self._ensure_schema()
+        self.schedule_calendar_store = ScheduleCalendarStore(engine)
 
     @property
     def cursor(self) -> int:
@@ -99,9 +109,10 @@ class HomeAutomationRuntime:
             raise ValueError("automation runtime clock must return a timezone-aware datetime")
         with self._lock:
             runs = self.drain_events()
-            runs.extend(self.engine.evaluate_schedules(current))
+            runs.extend(self.schedule_calendar_store.evaluate_schedules(current))
             # Consume schedule.fired and automation-result journal events so the durable
-            # cursor remains current. Schedule triggers are executed by evaluate_schedules.
+            # cursor remains current. Schedule triggers are executed by the calendar-aware
+            # driver using the engine's existing trigger evaluator.
             runs.extend(self.drain_events())
             return runs
 
@@ -131,6 +142,7 @@ class HomeAutomationRuntime:
 
     def snapshot(self) -> dict[str, object]:
         with self._lock:
+            calendar = self.schedule_calendar_store.snapshot()
             return {
                 "contract_version": AUTOMATION_RUNTIME_CONTRACT_VERSION,
                 "automation_storage_schema_version": self.engine.schema_version,
@@ -140,6 +152,11 @@ class HomeAutomationRuntime:
                 "last_error": self._last_error,
                 "delivery_semantics": "ordered-at-least-once",
                 "controller_local_schedule_clock": True,
+                "calendar_binding_enforced": True,
+                "calendar_binding_storage_schema_version": calendar[
+                    "storage_schema_version"
+                ],
+                "calendar_bound_schedules": calendar["calendar_bound_schedules"],
             }
 
     def _run_loop(self) -> None:
@@ -280,6 +297,12 @@ def automation_runtime_contract() -> dict[str, object]:
             "timezone": "controller-local",
             "poll_interval_min_seconds": 0.1,
             "poll_interval_max_seconds": 60.0,
+            "calendar_binding_enforced": True,
+            "calendar_binding_storage_schema_version": (
+                AUTOMATION_SCHEDULE_CALENDAR_STORAGE_VERSION
+            ),
+            "duplicate_occurrence_authority": "schedule.last_fired_key",
+            "location_data_persisted": False,
         },
         "network_write_api_exposed": False,
     }
