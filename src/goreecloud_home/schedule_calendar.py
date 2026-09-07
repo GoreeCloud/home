@@ -84,6 +84,21 @@ class PersistedScheduleCalendarBinding:
             return None
         return schedule.occurrence_key(at)
 
+    def unfired_occurrence_key(self, schedule: Schedule, at: datetime) -> str | None:
+        """Return the due occurrence only when the schedule has not recorded it.
+
+        ``Schedule.last_fired_key`` is already the automation engine's durable
+        duplicate-occurrence checkpoint. Reusing that authority keeps calendar
+        constraints from creating a second deduplication model and makes a
+        restarted engine fail closed for an occurrence it has already committed.
+        This helper does not mutate the schedule or persist anything by itself.
+        """
+
+        key = self.occurrence_key(schedule, at)
+        if key is None or schedule.last_fired_key == key:
+            return None
+        return key
+
     def _require_matching_schedule(self, schedule: Schedule) -> None:
         if not isinstance(schedule, Schedule):
             raise ValueError("schedule calendar binding requires a Schedule")
