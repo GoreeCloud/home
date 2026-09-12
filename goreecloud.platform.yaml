@@ -1,0 +1,175 @@
+schema_version: '0.2'
+
+component:
+  type: application
+  id: goreecloud-home
+  product_name: GoreeCloud Home
+  repository: GoreeCloud/goreecloud-home
+
+lifecycle: development
+version: 0.1.0-dev.5
+
+supported_platforms:
+  - linux
+
+api:
+  versions:
+    - v1
+  endpoints:
+    - name: liveness
+      url: /livez
+      purpose: Report Home Core process liveness without disclosing household state.
+    - name: readiness
+      url: /readyz
+      purpose: Report bounded Home state SQLite authority, schema and local automation-runtime readiness without exposing household data.
+    - name: service-status
+      url: /api/v1/status
+      purpose: Report bounded product, lifecycle, aggregate domain, adapter/availability, Home and automation storage-schema, local automation-runtime and contract-version status.
+
+platform_systems:
+  manager:
+    result: applicable-blocked
+    version: null
+    evidence: [SPECIFICATIONS.md, docs/platform-integration-status.md]
+    notes: Home exposes bounded health and status surfaces for future Manager consumption, including aggregate local automation-runtime state, but no Manager registration or acceptance exists.
+  privacy_shield:
+    result: applicable-blocked
+    version: null
+    evidence: [SPECIFICATIONS.md, docs/platform-integration-status.md, docs/privacy.md]
+    notes: Local-first privacy boundaries and future retention requirements are defined, but Privacy Shield enforcement and acceptance are not implemented. Presence semantics remain blocked pending explicit privacy policy and GoreeCloud Location integration.
+  wardveil_security:
+    result: applicable-blocked
+    version: null
+    evidence: [SPECIFICATIONS.md, docs/platform-integration-status.md, docs/security.md, docs/automation.md]
+    notes: The Development server is loopback-only and exposes no control write API. Automation and adapter-event ingress are bounded local operations, but Wardveil device trust, privileged-action, secret and risk controls are not integrated.
+  everkeep:
+    result: applicable-blocked
+    version: null
+    evidence: [SPECIFICATIONS.md, docs/platform-integration-status.md, docs/recovery.md, docs/storage.md]
+    notes: Home state schema remains version 5 and automation storage now has a separate migration ledger through version 2 in the same SQLite authority, including a durable local runtime cursor. Everkeep runtime integration, protected secret recovery, isolated restore acceptance and production rollback evidence do not exist.
+  glaze_ui:
+    result: applicable-blocked
+    version: null
+    evidence: [SPECIFICATIONS.md, docs/platform-integration-status.md, BRANDING.md]
+    notes: No Home client UI exists yet; Glaze UI 1.1.0 remains the declared consumer baseline in current Home project records, but application-specific conformance has not been implemented or accepted.
+  mesh:
+    result: applicable-blocked
+    version: null
+    evidence: [SPECIFICATIONS.md, docs/platform-integration-status.md, docs/architecture.md, docs/automation.md]
+    notes: Home now performs ordered local journal-to-automation routing without GoreeCloud Mesh. Cross-product discovery/events and Mesh acceptance remain unimplemented; Home retains independent durable local state, journal and automation execution authority.
+    capabilities: []
+    dependencies: []
+    published_events: []
+    consumed_events: []
+  identity:
+    result: applicable-blocked
+    version: null
+    evidence: [SPECIFICATIONS.md, docs/platform-integration-status.md, docs/security.md, docs/privacy.md, docs/automation.md]
+    notes: Household identities, guests, sessions, roles and capability-scoped authorization require GoreeCloud Identity, but no runtime integration or acceptance exists and automation/adapter-event methods are not network authorization surfaces.
+
+health:
+  health_endpoint: /livez
+  readiness_endpoint: /readyz
+
+continuity:
+  backup:
+    required: true
+    requirements:
+      - Protect Home configuration, room/device registry, capability mappings, desired/reported state, scenes, schedules, automations, execution history required for recovery, the local automation runtime cursor, and privacy-permitted history.
+      - Keep reusable protocol credentials and other secrets outside ordinary application backups unless an approved protected recovery contract explicitly includes them.
+  restore:
+    required: true
+    requirements:
+      - Validate restoration into an isolated environment before production qualification.
+      - Verify Home state and automation migration ledgers, local runtime cursor behavior, device identity mappings, capability/automation/adapter-event contracts, automation semantics, authorization boundaries and adapter configuration for the exact release under test.
+  export:
+    required: true
+    requirements:
+      - Provide documented portable exports for user-owned Home configuration, room/device organization, scenes, schedules and automations.
+      - Preserve semantic capability identifiers and relationships needed to migrate without exporting unrelated secrets.
+  portability:
+    required: true
+    requirements:
+      - Keep protocol adapters replaceable behind versioned GoreeCloud capability, availability, adapter-lifecycle, adapter-event and state-revision contracts.
+      - Keep automation semantics and local runtime routing versioned and independent of protocol-specific state models.
+      - Use documented data formats and migrations for durable Home and automation state.
+
+external_dependencies: []
+
+compatibility:
+  platform_contract: '0.2'
+  glaze_ui_required: 1.1.0
+  requires: [goreecloud-platform-contract==0.2]
+  provides:
+    - goreecloud-home-api-v1
+    - goreecloud-home-domain-v1
+    - goreecloud-home-capabilities-v1
+    - goreecloud-home-device-availability-v1
+    - goreecloud-home-state-revision-v1
+    - goreecloud-home-adapter-lifecycle-v1
+    - goreecloud-home-adapter-events-v1
+    - goreecloud-home-automation-v1
+    - goreecloud-home-automation-runtime-v1
+
+evidence:
+  acceptance_tests: []
+  release: []
+
+conformance:
+  status: nonconformant
+  validated_at: null
+  evidence:
+    - README.md
+    - SPECIFICATIONS.md
+    - docs/architecture.md
+    - docs/platform-integration-status.md
+    - docs/security.md
+    - docs/privacy.md
+    - docs/recovery.md
+    - docs/storage.md
+    - docs/state-contracts.md
+    - docs/automation.md
+    - contracts/capabilities.v1.json
+    - contracts/device-availability.v1.json
+    - contracts/state-revision.v1.json
+    - contracts/adapter-lifecycle.v1.json
+    - contracts/adapter-events.v1.json
+    - contracts/automation.v1.json
+    - contracts/automation-runtime.v1.json
+    - src/goreecloud_home/models.py
+    - src/goreecloud_home/capabilities.py
+    - src/goreecloud_home/availability.py
+    - src/goreecloud_home/state_revision.py
+    - src/goreecloud_home/adapters.py
+    - src/goreecloud_home/adapter_events.py
+    - src/goreecloud_home/automation.py
+    - src/goreecloud_home/automation_engine.py
+    - src/goreecloud_home/automation_runtime.py
+    - src/goreecloud_home/storage.py
+    - src/goreecloud_home/core.py
+    - src/goreecloud_home/journal.py
+    - src/goreecloud_home/api.py
+    - tests/test_core.py
+    - tests/test_journal.py
+    - tests/test_persistence.py
+    - tests/test_availability.py
+    - tests/test_state_revision.py
+    - tests/test_adapters.py
+    - tests/test_adapter_events.py
+    - tests/test_automation.py
+    - tests/test_automation_runtime.py
+    - tests/test_contracts.py
+    - VERSION
+  blockers:
+    - GoreeCloud Home remains Development source and has no RC, Stable or production-approved release.
+    - GoreeCloud Identity authentication, sessions, household roles, guest access and capability-scoped authorization are not implemented or accepted.
+    - Wardveil Security device-trust, privileged-action, credential, network-risk and application acceptance are incomplete.
+    - Privacy Shield household telemetry, presence, camera, history retention, sharing and application acceptance are incomplete.
+    - Everkeep backup, restore, export, migration and recovery acceptance are incomplete.
+    - GoreeCloud Manager registration, monitoring and acceptance are incomplete.
+    - GoreeCloud Mesh capability registration, cross-product events and acceptance are incomplete.
+    - Glaze UI 1.1.0 Home client implementation, visual automation editor, rendered validation, accessibility and application acceptance are incomplete.
+    - Matter, Thread, Zigbee, Z-Wave, MQTT, BLE and local LAN device interoperability are not implemented or validated.
+    - Sunrise/sunset, calendar and presence triggers, GoreeCloud Location integration, exact crash-deduplicated automation delivery, and concrete protocol adapter implementations remain incomplete.
+    - Notifications, cameras/media, energy management, remote access, AI/voice and production clients are incomplete.
+    - Packaging, signing, provenance, deployment, upgrade, rollback, hardware validation and production acceptance are incomplete.

@@ -1,0 +1,16 @@
+{
+  "capabilities": [
+    {"maximum": 100, "minimum": 0, "name": "cover.position", "unit": "percent", "value_kind": "integer", "version": 1, "writable": true},
+    {"maximum": 100, "minimum": 0, "name": "light.brightness", "unit": "percent", "value_kind": "integer", "version": 1, "writable": true},
+    {"name": "light.power", "value_kind": "boolean", "version": 1, "writable": true},
+    {"allowed_values": ["locked", "unlocked", "jammed", "unknown"], "desired_allowed_values": ["locked", "unlocked"], "name": "lock.state", "value_kind": "string", "version": 1, "writable": true},
+    {"allowed_values": ["open", "closed"], "name": "sensor.contact", "value_kind": "string", "version": 1, "writable": false},
+    {"maximum": 100, "minimum": 0, "name": "sensor.humidity", "unit": "percent", "value_kind": "number", "version": 1, "writable": false},
+    {"name": "sensor.motion", "value_kind": "boolean", "version": 1, "writable": false},
+    {"name": "sensor.temperature", "unit": "celsius", "value_kind": "number", "version": 1, "writable": false},
+    {"name": "switch.power", "value_kind": "boolean", "version": 1, "writable": true},
+    {"maximum": 80, "minimum": -50, "name": "thermostat.target_temperature", "unit": "celsius", "value_kind": "number", "version": 1, "writable": true}
+  ],
+  "contract": "goreecloud-home-capabilities",
+  "contract_version": "1.0"
+}

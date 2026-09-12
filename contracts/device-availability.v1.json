@@ -1,0 +1,13 @@
+{
+  "allowed_transitions": {
+    "degraded": ["offline", "online"],
+    "offline": ["degraded", "online"],
+    "online": ["degraded", "offline"],
+    "unknown": ["degraded", "offline", "online"]
+  },
+  "contract": "goreecloud-home-device-availability",
+  "contract_version": "1.0",
+  "same_state_observation": true,
+  "states": ["unknown", "online", "degraded", "offline"],
+  "unknown_is_initial_only": true
+}

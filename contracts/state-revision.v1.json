@@ -1,0 +1,13 @@
+{
+  "conflict_error": "state_revision_conflict",
+  "contract": "goreecloud-home-state-revision",
+  "contract_version": "1.0",
+  "create_expected_revision": 0,
+  "initial_revision": 1,
+  "mutation_increment": 1,
+  "state_kinds": [
+    "desired",
+    "reported"
+  ],
+  "unconditional_expected_revision": null
+}

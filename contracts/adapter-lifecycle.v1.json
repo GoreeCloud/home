@@ -1,0 +1,44 @@
+{
+  "allowed_transitions": {
+    "degraded": [
+      "failed",
+      "ready",
+      "stopped"
+    ],
+    "failed": [
+      "starting",
+      "stopped"
+    ],
+    "ready": [
+      "degraded",
+      "failed",
+      "stopped"
+    ],
+    "registered": [
+      "starting",
+      "stopped"
+    ],
+    "starting": [
+      "degraded",
+      "failed",
+      "ready",
+      "stopped"
+    ],
+    "stopped": [
+      "starting"
+    ]
+  },
+  "contract": "goreecloud-home-adapter-lifecycle",
+  "contract_version": "1.0",
+  "device_reference_requires_registration": true,
+  "initial_state": "registered",
+  "same_state_observation": true,
+  "states": [
+    "registered",
+    "starting",
+    "ready",
+    "degraded",
+    "failed",
+    "stopped"
+  ]
+}

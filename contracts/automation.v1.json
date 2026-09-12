@@ -1,0 +1,45 @@
+{
+  "action_kinds": [
+    "set_desired",
+    "activate_scene"
+  ],
+  "condition_kinds": [
+    "desired_state_equals",
+    "reported_state_equals",
+    "availability_equals"
+  ],
+  "contract": "goreecloud-home-automation",
+  "contract_version": "1.0",
+  "execution": {
+    "all_actions_atomic": true,
+    "arbitrary_code_actions": false,
+    "definition_order": true,
+    "failed_run_records_error": true,
+    "network_write_api_exposed": false
+  },
+  "limits": {
+    "automation_actions": 32,
+    "automation_conditions": 16,
+    "automation_retry_attempts": 3,
+    "automation_runs_per_trigger": 32,
+    "scene_actions": 32
+  },
+  "run_statuses": [
+    "running",
+    "succeeded",
+    "failed",
+    "skipped"
+  ],
+  "schedule": {
+    "background_clock_driver": false,
+    "duplicate_occurrence_suppression": true,
+    "requires_timezone_aware_evaluation": true,
+    "weekday_domain": [0, 1, 2, 3, 4, 5, 6]
+  },
+  "trigger_kinds": [
+    "manual",
+    "reported_state_equals",
+    "availability_equals",
+    "schedule"
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "accepted_adapter_lifecycle_states": [
+    "degraded",
+    "ready"
+  ],
+  "automatic_local_automation_routing": true,
+  "availability_uses_device_availability_contract": true,
+  "contract": "goreecloud-home-adapter-events",
+  "contract_version": "1.0",
+  "device_reference_requires_adapter_binding": true,
+  "event_kinds": [
+    "reported_state",
+    "availability"
+  ],
+  "network_ingress_exposed": false,
+  "protocol_implementation": false,
+  "reported_state_uses_capability_contract": true,
+  "scope": "trusted-local-ingress"
+}
